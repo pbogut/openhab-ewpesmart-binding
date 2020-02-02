@@ -24,7 +24,7 @@
 		</channels>
 
 		<config-description>
-			<parameter name="broadcastIpAddress" type="text" required="true">
+			<parameter name="broadcastIp" type="text" required="true">
 				<label>Broadcast IP</label>
 				<description>Broadcast IP Address</description>
 				<context>network-address</context>

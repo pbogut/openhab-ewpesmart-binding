@@ -27,7 +27,9 @@ public class EWPESmartBindingConstants {
     private static final String BINDING_ID = "ewpesmart";
 
     // List of all Thing Type UIDs
-    public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "sample");
+    public static final ThingTypeUID THING_TYPE_AIRCON = new ThingTypeUID(BINDING_ID, "EWPEAirCon");
+
+    public static final String CONFIG_BROADCAST_IP = "broadcastIp";
 
     // List of all Channel ids
     public static final String CHANNEL_1 = "channel1";
