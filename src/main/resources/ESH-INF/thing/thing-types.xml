@@ -28,6 +28,17 @@
 				<label>Broadcast IP</label>
 				<description>Broadcast IP Address</description>
 				<context>network-address</context>
+				<default>192.168.0.255</default>
+			</parameter>
+			<parameter name="ipAddress" type="text" required="false">
+				<label>IP Address</label>
+				<description>Device IP Address</description>
+				<context>network-address</context>
+			</parameter>
+			<parameter name="refresh" type="integer" min="0" max="10" step="1">
+				<label>Refresh rate</label>
+				<description>Status refresh rate</description>
+				<default>2</default>
 			</parameter>
 		</config-description>
 

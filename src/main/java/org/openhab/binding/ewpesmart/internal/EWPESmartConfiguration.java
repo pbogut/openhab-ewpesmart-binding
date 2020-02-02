@@ -22,5 +22,8 @@ public class EWPESmartConfiguration {
     /**
      * Sample configuration parameter. Replace with your own.
      */
-    public String broadcastIp;
+    public String broadcastIp; //EWPESmartBindingConstants.CONFIG_BROADCAST_IP
+    @Nullable
+    public String ipAddress; //EWPESmartBindingConstants.CONFIG_IP_ADDRESS
+    public Integer refresh; //EWPESmartBindingConstants.CONFIG_REFRESH
 }

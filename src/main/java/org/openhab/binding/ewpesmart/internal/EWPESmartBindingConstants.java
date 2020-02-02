@@ -31,6 +31,8 @@ public class EWPESmartBindingConstants {
 
     // List of all Config options
     public static final String CONFIG_BROADCAST_IP = "broadcastIp";
+    public static final String CONFIG_IP_ADDRESS = "ipAddress";
+    public static final String CONFIG_REFRESH = "refresh";
 
     // List of all Channel ids
     public static final String POWER_CHANNEL = "power";
