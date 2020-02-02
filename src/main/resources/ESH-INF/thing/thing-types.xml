@@ -10,23 +10,83 @@
 		<description>Sample thing for EWPESmart Binding</description>
 
 		<channels>
-			<channel id="channel1" typeId="sample-channel" />
+			<channel id="power" typeId="powerType" />
+			<channel id="mode" typeId="modeType" />
+			<channel id="turbo" typeId="turboType" />
+			<channel id="light" typeId="lightType" />
+			<channel id="temp" typeId="tempType" />
+			<channel id="swingVertical" typeId="swingVerticalType" />
+			<channel id="windSpeed" typeId="windSpeedType" />
+			<channel id="air" typeId="airType" />
+			<channel id="dry" typeId="dryType" />
+			<channel id="health" typeId="healthType" />
+			<channel id="powerSave" typeId="powerSaveType" />
 		</channels>
 
 		<config-description>
-			<parameter name="config1" type="text" required="true">
-				<label>Sample Parameter</label>
-				<description>This is a sample text configuration parameter</description>
+			<parameter name="broadcastIpAddress" type="text" required="true">
+				<label>Broadcast IP</label>
+				<description>Broadcast IP Address</description>
+				<context>network-address</context>
 			</parameter>
 		</config-description>
 
 	</thing-type>
 
 	<!-- Sample Channel Type -->
-	<channel-type id="sample-channel">
-		<item-type>ewpesmartItem</item-type>
-		<label>EWPESmart Binding Channel</label>
-		<description>Sample channel for EWPESmart Binding</description>
+	<channel-type id="powerType">
+		<item-type>Switch</item-type>
+		<label>Power</label>
+		<description>Current Power Setting</description>
 	</channel-type>
-
+	<channel-type id="modeType">
+		<item-type>Switch</item-type>
+		<label>Mode</label>
+		<description>Current Mode Setting (0:Auto, 1:Cool, 2:Dry, 3:Fan, 4:Heat)</description>
+	</channel-type>
+	<channel-type id="turboType">
+		<item-type>Switch</item-type>
+		<label>Turbo</label>
+		<description>Current Turbo Setting</description>
+	</channel-type>
+	<channel-type id="lightType">
+		<item-type>Switch</item-type>
+		<label>Light</label>
+		<description>Current Light Setting</description>
+	</channel-type>
+	<channel-type id="tempType">
+		<item-type>Switch</item-type>
+		<label>Temperature</label>
+		<description>Current Temperature Setting</description>
+	</channel-type>
+	<channel-type id="swingVerticalType">
+		<item-type>Switch</item-type>
+		<label>Swing Vertical Direction</label>
+		<description>Current Swing Vertical Direction Setting (0:Off, 1:Full, 2:Up, 3:Mid-up, 4:Mid, 5:Mid-low, 6:Down)</description>
+	</channel-type>
+	<channel-type id="windSpeedType">
+		<item-type>Switch</item-type>
+		<label>Wind Speed</label>
+		<description>Current Wind Speed Setting (0:Auto, 1:Low, 2:MidLow, 3:Mid, 4:MidHigh, 5:High)</description>
+	</channel-type>
+	<channel-type id="airType">
+		<item-type>Switch</item-type>
+		<label>Air</label>
+		<description>Current Air Setting</description>
+	</channel-type>
+	<channel-type id="dryType">
+		<item-type>Switch</item-type>
+		<label>Dry</label>
+		<description>Current Dry Setting</description>
+	</channel-type>
+	<channel-type id="healthType">
+		<item-type>Switch</item-type>
+		<label>Health</label>
+		<description>Current Health Setting</description>
+	</channel-type>
+	<channel-type id="powerSaveType">
+		<item-type>Switch</item-type>
+		<label>Power Save</label>
+		<description>Current Power Save Setting</description>
+	</channel-type>
 </thing:thing-descriptions>
