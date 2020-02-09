@@ -35,15 +35,15 @@ public class EWPESmartBindingConstants {
     public static final String CONFIG_REFRESH = "refresh";
 
     // List of all Channel ids
-    public static final String POWER_CHANNEL = "power";
-    public static final String MODE_CHANNEL = "mode";
-    public static final String TURBO_CHANNEL = "turbo";
-    public static final String LIGHT_CHANNEL = "light";
-    public static final String TEMP_CHANNEL = "temp";
-    public static final String SWINGV_CHANNEL = "swingVertical";
-    public static final String WINDSPEED_CHANNEL = "windSpeed";
-    public static final String AIR_CHANNEL = "air";
-    public static final String DRY_CHANNEL = "dry";
-    public static final String HEALTH_CHANNEL = "health";
-    public static final String PWRSAV_CHANNEL = "powerSave";
+    public static final String CHANNEL_POWER = "power";
+    public static final String CHANNEL_MODE = "mode";
+    public static final String CHANNEL_TURBO = "turbo";
+    public static final String CHANNEL_LIGHT = "light";
+    public static final String CHANNEL_TEMP = "temp";
+    public static final String CHANNEL_SWING_VERTICAL= "swingVertical";
+    public static final String CHANNEL_WIND_SPEED = "windSpeed";
+    public static final String CHANNEL_AIR = "air";
+    public static final String CHANNEL_DRY = "dry";
+    public static final String CHANNEL_HEALTH = "health";
+    public static final String CHANNEL_POWER_SAVE = "powerSave";
 }

@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
@@ -44,17 +45,43 @@ public class EWPESmartHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (CHANNEL_1.equals(channelUID.getId())) {
+        logger.debug("Channel update: {}", channelUID.getId());
+        try {
             if (command instanceof RefreshType) {
                 // TODO: handle data refresh
+            } else if (CHANNEL_POWER.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_MODE.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_TURBO.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_LIGHT.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_TEMP.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_SWING_VERTICAL.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_WIND_SPEED.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_AIR.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_DRY.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_HEALTH.equals(channelUID.getId())) {
+                // TODO: handle command
+            } else if (CHANNEL_POWER_SAVE.equals(channelUID.getId())) {
+                // TODO: handle command
             }
-
-            // TODO: handle command
 
             // Note: if communication with thing fails for some reason,
             // indicate that by setting the status with detail information:
             // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
             // "Could not control device at IP address x.x.x.x");
+            updateStatus(ThingStatus.ONLINE);
+        } catch (Exception e) {
+            logger.warn("EWPESmart failed to update channel {} due to {} ", channelUID.getId(), e.getMessage());
+            updateStatus(ThingStatus.OFFLINE);
+            // e.printStackTrace();
         }
     }
 
