@@ -4,8 +4,7 @@
 	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
-	<!-- Sample Thing Type -->
-	<thing-type id="sample">
+	<thing-type id="EWPEAirCon">
 		<label>EWPESmart Binding Thing</label>
 		<description>Sample thing for EWPESmart Binding</description>
 
@@ -44,7 +43,6 @@
 
 	</thing-type>
 
-	<!-- Sample Channel Type -->
 	<channel-type id="powerType">
 		<item-type>Switch</item-type>
 		<label>Power</label>
