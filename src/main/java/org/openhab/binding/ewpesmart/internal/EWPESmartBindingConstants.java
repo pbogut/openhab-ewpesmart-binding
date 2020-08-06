@@ -40,6 +40,7 @@ public class EWPESmartBindingConstants {
     public static final String CHANNEL_TURBO = "turbo";
     public static final String CHANNEL_LIGHT = "light";
     public static final String CHANNEL_TEMP = "temp";
+    public static final String CHANNEL_TEMP_SENSOR = "tempSensor";
     public static final String CHANNEL_SWING_VERTICAL= "swingVertical";
     public static final String CHANNEL_WIND_SPEED = "windSpeed";
     public static final String CHANNEL_AIR = "air";

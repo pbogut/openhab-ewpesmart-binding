@@ -388,6 +388,10 @@ public class EWPEDevice {
         return GetIntStatusVal("SetTem");
     }
 
+    public Integer GetDeviceTempSen() {
+        return GetIntStatusVal("TemSen");
+    }
+
     public void SetDeviceAir(DatagramSocket clientSocket, Integer value) throws Exception {
         // Only allow this to happen if this device has been bound
         if (getIsBound() != Boolean.TRUE) {
@@ -480,6 +484,7 @@ public class EWPEDevice {
          * "Tur": Turbo
          * "StHt": 0,
          * "TemUn": Temperature unit, 0 for Celsius, 1 for Fahrenheit
+         * "TemSen": Room Temperature
          * "HeatCoolType"
          * "TemRec": (0 or 1), Send with SetTem, when TemUn==1, distinguishes between upper and lower integer Fahrenheit temp
          * "SvSt": Power Saving
@@ -607,6 +612,7 @@ public class EWPEDevice {
         columns.add("Tur");
         columns.add("StHt");
         columns.add("TemUn");
+        columns.add("TemSen");
         columns.add("HeatCoolType");
         columns.add("TemRec");
         columns.add("SvSt");

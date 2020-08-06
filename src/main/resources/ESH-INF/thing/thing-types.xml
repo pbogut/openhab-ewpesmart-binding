@@ -14,6 +14,7 @@
 			<channel id="turbo" typeId="turboType" />
 			<channel id="light" typeId="lightType" />
 			<channel id="temp" typeId="tempType" />
+			<channel id="tempSensor" typeId="tempSensorType" />
 			<channel id="swingVertical" typeId="swingVerticalType" />
 			<channel id="windSpeed" typeId="windSpeedType" />
 			<channel id="air" typeId="airType" />
@@ -67,6 +68,11 @@
 		<item-type>Switch</item-type>
 		<label>Temperature</label>
 		<description>Current Temperature Setting</description>
+	</channel-type>
+	<channel-type id="tempSensorType">
+		<item-type>Switch</item-type>
+		<label>Room Temperature</label>
+		<description>Current Room Temperature</description>
 	</channel-type>
 	<channel-type id="swingVerticalType">
 		<item-type>Switch</item-type>
