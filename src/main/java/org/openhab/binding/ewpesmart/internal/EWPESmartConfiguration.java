@@ -12,6 +12,8 @@
  */
 package org.openhab.binding.ewpesmart.internal;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link EWPESmartConfiguration} class contains fields mapping thing configuration parameters.
  *
@@ -22,8 +24,36 @@ public class EWPESmartConfiguration {
     /**
      * Sample configuration parameter. Replace with your own.
      */
-    public String broadcastIp; //EWPESmartBindingConstants.CONFIG_BROADCAST_IP
-    @Nullable
-    public String ipAddress; //EWPESmartBindingConstants.CONFIG_IP_ADDRESS
+    public @Nullable String broadcastIp; //EWPESmartBindingConstants.CONFIG_BROADCAST_IP
+    public @Nullable String ipAddress; //EWPESmartBindingConstants.CONFIG_IP_ADDRESS
     public Integer refresh; //EWPESmartBindingConstants.CONFIG_REFRESH
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public String getBroadcastIp() {
+        return broadcastIp;
+    }
+
+    public Integer getRefresh() {
+        return refresh;
+    }
+
+    public boolean isValid() {
+        try {
+            if (ipAddress.isEmpty()) {
+                return false;
+            }
+            if (broadcastIp.isEmpty()) {
+                return false;
+            }
+            if (refresh.intValue() <= 0) {
+                throw new IllegalArgumentException("Refresh time must be positive number!");
+            }
+            return true;
+        } catch (Exception err) {
+            return false;
+        }
+    }
 }

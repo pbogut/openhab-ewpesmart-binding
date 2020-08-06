@@ -46,4 +46,7 @@ public class EWPESmartBindingConstants {
     public static final String CHANNEL_DRY = "dry";
     public static final String CHANNEL_HEALTH = "health";
     public static final String CHANNEL_POWER_SAVE = "powerSave";
+
+    // Other constants
+    public static final int DATAGRAM_SOCKET_TIMEOUT = 5000;
 }

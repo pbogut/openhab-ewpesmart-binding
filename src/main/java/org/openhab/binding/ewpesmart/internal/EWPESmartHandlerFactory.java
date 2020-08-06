@@ -26,6 +26,10 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.osgi.service.component.annotations.Component;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The {@link EWPESmartHandlerFactory} is responsible for creating things and thing
  * handlers.
@@ -36,10 +40,13 @@ import org.osgi.service.component.annotations.Component;
 @Component(configurationPid = "binding.ewpesmart", service = ThingHandlerFactory.class)
 public class EWPESmartHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_SAMPLE);
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_AIRCON);
+    private final Logger logger = LoggerFactory.getLogger(EWPESmartHandlerFactory.class);
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
+        logger.warn("SupportsThingType {}", thingTypeUID);
+        logger.warn("SupportsThingType {}", SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID));
         return SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID);
     }
 
@@ -47,7 +54,7 @@ public class EWPESmartHandlerFactory extends BaseThingHandlerFactory {
     protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
-        if (THING_TYPE_SAMPLE.equals(thingTypeUID)) {
+        if (THING_TYPE_AIRCON.equals(thingTypeUID)) {
             return new EWPESmartHandler(thing);
         }
 

@@ -14,8 +14,15 @@ package org.openhab.binding.ewpesmart.internal;
 
 import static org.openhab.binding.ewpesmart.internal.EWPESmartBindingConstants.*;
 
+import org.openhab.binding.ewpesmart.internal.device.EWPEDevice;
+import org.openhab.binding.ewpesmart.internal.device.EWPEDeviceFinder;
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -32,12 +39,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author Pawel Bogut - Initial contribution
  */
-@NonNullByDefault
+// @NonNullByDefault
 public class EWPESmartHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(EWPESmartHandler.class);
+    private EWPEDeviceFinder deviceFinder = null;
+    private EWPEDevice thisDevice = null;
+    private DatagramSocket clientSocket = null;
+    private Integer refreshTime = 2;
 
-    private @Nullable EWPESmartConfiguration config;
+    private String ipAddress = null;
+    private String broadcastAddress = null;
+
+    private EWPESmartConfiguration config;
 
     public EWPESmartHandler(Thing thing) {
         super(thing);
@@ -50,6 +64,11 @@ public class EWPESmartHandler extends BaseThingHandler {
             if (command instanceof RefreshType) {
                 // TODO: handle data refresh
             } else if (CHANNEL_POWER.equals(channelUID.getId())) {
+                if (command.toString() == "ON") {
+                    thisDevice.SetDevicePower(clientSocket, 1);
+                } else {
+                    thisDevice.SetDevicePower(clientSocket, 0);
+                }
                 // TODO: handle command
             } else if (CHANNEL_MODE.equals(channelUID.getId())) {
                 // TODO: handle command
@@ -77,49 +96,81 @@ public class EWPESmartHandler extends BaseThingHandler {
             // indicate that by setting the status with detail information:
             // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
             // "Could not control device at IP address x.x.x.x");
-            updateStatus(ThingStatus.ONLINE);
+            // updateStatus(ThingStatus.ONLINE);
         } catch (Exception e) {
             logger.warn("EWPESmart failed to update channel {} due to {} ", channelUID.getId(), e.getMessage());
-            updateStatus(ThingStatus.OFFLINE);
+            // updateStatus(ThingStatus.OFFLINE);
             // e.printStackTrace();
         }
     }
 
     @Override
     public void initialize() {
-        // logger.debug("Start initializing!");
+        logger.debug("EWPESmartHandler for {} is initializing", thing.getUID());
+
         config = getConfigAs(EWPESmartConfiguration.class);
+        logger.debug("EWPESmartHandler config for {} is {}", thing.getUID(), config);
 
-        // TODO: Initialize the handler.
-        // The framework requires you to return from this method quickly. Also, before leaving this method a thing
-        // status from one of ONLINE, OFFLINE or UNKNOWN must be set. This might already be the real thing status in
-        // case you can decide it directly.
-        // In case you can not decide the thing status directly (e.g. for long running connection handshake using WAN
-        // access or similar) you should set status UNKNOWN here and then decide the real status asynchronously in the
-        // background.
-
-        // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
-        // the framework is then able to reuse the resources from the thing handler initialization.
-        // we set this upfront to reliably check status updates in unit tests.
         updateStatus(ThingStatus.UNKNOWN);
 
-        // Example for background initialization:
-        scheduler.execute(() -> {
-            boolean thingReachable = true; // <background task with long running initialization here>
-            // when done do:
-            if (thingReachable) {
-                updateStatus(ThingStatus.ONLINE);
-            } else {
-                updateStatus(ThingStatus.OFFLINE);
+        if (!config.isValid()) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+            "Invalid EWPE Smart config. Check configuration.");
+        } else {
+            // @fixme @todo not working within lambda, not sure why
+            // scheduler.execute(() -> {
+            //     bindDevice();
+            // });
+            bindDevice();
+        }
+
+        logger.debug("Finished initializing!");
+    }
+
+
+    private void bindDevice() {
+        ipAddress = config.getIpAddress();
+        refreshTime = config.getRefresh();
+        broadcastAddress = config.getBroadcastIp();
+
+        // Now Scan For Airconditioners
+        try {
+            // First calculate the Broadcast address based on the available interfaces
+            InetAddress broadcastIp = InetAddress.getByName(broadcastAddress);
+
+            // Create a new Datagram socket with a specified timeout
+            clientSocket = new DatagramSocket();
+            clientSocket.setSoTimeout(DATAGRAM_SOCKET_TIMEOUT);
+
+            // Firstly, lets find all Gree Airconditioners on the network
+            deviceFinder = new EWPEDeviceFinder(broadcastIp);
+            deviceFinder.Scan(clientSocket);
+            logger.debug("EWPESmart found {} Devices during scanning", deviceFinder.GetScannedDeviceCount());
+
+            // Now check that this one is amongst the air conditioners that responded.
+            thisDevice = deviceFinder.GetDeviceByIPAddress(ipAddress);
+            logger.debug("EWPESmart found device {}", thisDevice);
+            if (thisDevice != null) {
+                // Ok, our device responded
+                // Now let's Bind with it
+                thisDevice.BindWithDevice(clientSocket);
+                if (thisDevice.getIsBound()) {
+                    logger.info("EWPESmart AirConditioner Device {} was Succesfully bound", thing.getUID());
+                    updateStatus(ThingStatus.ONLINE);
+
+                    // Start the automatic refresh cycles
+                    // startAutomaticRefresh();
+                    return;
+                }
             }
-        });
-
-        // logger.debug("Finished initializing!");
-
-        // Note: When initialization can NOT be done set the status with more details for further
-        // analysis. See also class ThingStatusDetail for all available status details.
-        // Add a description to give user information to understand why thing does not work as expected. E.g.
-        // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-        // "Can not access device as username and/or password are invalid");
+            updateStatus(ThingStatus.ONLINE);
+        } catch (UnknownHostException e) {
+            logger.debug("EWPESmart failed to scan for airconditioners due to {} ", e.getMessage());
+        } catch (IOException e) {
+            logger.debug("EWPESmart failed to scan for airconditioners due to {} ", e.getMessage());
+        } catch (Exception e) {
+            logger.debug("EWPESmart failed to scan for airconditioners due to {} ", e.getMessage());
+        }
+        updateStatus(ThingStatus.OFFLINE);
     }
 }
