@@ -1,56 +1,120 @@
 # EWPESmart Binding
 
-_Give some details about what this binding is meant for - a protocol, system, specific device._
+This binding allows you too add EWPESmart Air Conditioners as things (Gree, Sinclair, maybe others as well). Once added as a thing, the user can control the Air Conditioner, similarly to how the Air Conditioner is controlled using the remote control or smartphone app.
 
-_If possible, provide some resources like pictures, a YouTube video, etc. to give an impression of what can be done with this binding. You can place such resources into a `doc` folder next to this README.md._
+Note : The EWPESmart Air Conditioner must already be setup on the wifi network and must have a fixed IP Address.
 
 ## Supported Things
 
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+This binding supports one Thing type: EWPEAirCon.
 
 ## Discovery
 
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
-
-## Binding Configuration
-
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
-
-```
-# Configuration for the Philips Hue Binding
-#
-# Default secret key for the pairing of the Philips Hue Bridge.
-# It has to be between 10-40 (alphanumeric) characters
-# This may be changed by the user for security reasons.
-secret=openHABSecret
-```
-
-_Note that it is planned to generate some part of this based on the information that is available within ```src/main/resources/ESH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+Discovery is possible but as yet is not supported in this binding.
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the (Paper) UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
-
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
+Currently can only be set up via thing-file. `ipAddress` and `broadcastIp` are required, `refresh` is optional (by default 2 seconds).
 
 ## Channels
 
-_Here you should provide information about available channel types, what their meaning is and how they can be used._
+The following channels are supported:
 
-_Note that it is planned to generate some part of this based on the XML files within ```src/main/resources/ESH-INF/thing``` of your binding._
-
-| channel  | type   | description                  |
-|----------|--------|------------------------------|
-| control  | Switch | This is the control channel  |
+| channel        | type      | description                                           |
+|----------------|-----------|-------------------------------------------------------|
+| power          | Switch    | Power on/off the Air Conditioner                      |
+| mode           | Number    | Sets the operating mode of the Air Conditioner        |
+|                            | Mode: Auto: 0, Cool: 1, Dry: 2, Fan: 3, Heat: 4       |
+|                            | For more details see the Air Conditioner's operating  |
+|                            | manual.                                               |
+| turbo          | Switch    | Set on/off the Air Conditioner's Turbo mode.          |
+|                            | For more details see the Air Conditioner's operating  |
+|                            | manual.                                               |
+| light          | Switch    | Enable/disable the front display on the Air           |
+|                            | Conditioner if applicable to the Air Conditioner model|
+| temp           | Number    | Sets the desired room temperature                     |
+| tempSensor     | Number    | Sets the desired room temperature                     |
+| swingVertical  | Number    | Sets the vertical swing action on the Air Conditioner |
+|                            | Full Swing: 1, Up: 2, MidUp: 3, Mid: 4, Mid Down: 5,  |
+|                            | Down : 6                                              |
+| windSpeed      | Number    | Sets the fan speed on the Air conditioner             |
+|                            | Auto:0, Low:1, MidLow:2, Mid:3, MidHigh:4, High:5     |
+|                            | The number of speeds depends on the Air Conditioner   |
+|                            | model.                                                |
+| air            | Switch    | Set on/off the Air Conditioner's Air function if      |
+|                            | applicable to the Air Conditioner model               |
+| dry            | Switch    | Set on/off the Air Conditioner's Dry function if      |
+|                            | applicable to the Air Conditioner model               |
+| health         | Switch    | Set on/off the Air Conditioner's Health function if   |
+|                            | applicable to the Air Conditioner model               |
+| powerSave      | Switch    | Set on/off the Air Conditioner's Power Saving function|   |
+|                            | if applicable to the Air Conditioner model            |
 
 ## Full Example
 
-_Provide a full usage example based on textual configuration files (*.things, *.items, *.sitemap)._
+Things:
 
-## Any custom content here!
+```
+Thing ewpesmart:EWPEAirCon:000001 "AirCon" @ "Hall Way" [ ipAddress="192.168.1.123", broadcastIp="192.168.1.255", refresh=2 ]
+```
+
+Items:
+
+```
+Switch AirconPower                         { channel="ewpesmart:EWPEAirCon:000001:power" }
+Number AirconMode                          { channel="ewpesmart:EWPEAirCon:000001:mode" }
+Switch AirconTurbo                         { channel="ewpesmart:EWPEAirCon:000001:turbo" }
+Switch AirconLight                         { channel="ewpesmart:EWPEAirCon:000001:light" }
+Number AirconTemp "Temperature [%.1f °C]"  { channel="ewpesmart:EWPEAirCon:000001:temp" }
+Number AirconRoomTemp "Room Temp[%.1f °C]" { channel="ewpesmart:EWPEAirCon:000001:tempSensor" }
+Number AirconTempSet                       { channel="ewpesmart:EWPEAirCon:000001:temp" }
+Number AirconSwingVertical                 { channel="ewpesmart:EWPEAirCon:000001:swingVertical" }
+Number AirconFanSpeed                      { channel="ewpesmart:EWPEAirCon:000001:windSpeed" }
+Switch AirconAir                           { channel="ewpesmart:EWPEAirCon:000001:air" }
+Switch AirconDry                           { channel="ewpesmart:EWPEAirCon:000001:dry" }
+Switch AirconHealth                        { channel="ewpesmart:EWPEAirCon:000001:health" }
+Switch AirconPowerSaving                   { channel="ewpesmart:EWPEAirCon:000001:powerSave" }
+```
+
+Sitemap:
+
+```
+Frame label="Controls"
+{
+   Switch item=AirconPower label="Power" icon=switch
+   Switch item=AirconMode label="Mode" mappings=[0="Auto", 1="Cool", 2="Dry", 3="Fan", 4="Heat"]
+   Setpoint item=AirconTemp label="Set temperature" icon=temperature minValue=16 maxValue=30 step=1
+}
+Frame label="Fan Speed"
+{
+   Switch item=AirconFanSpeed label="Fan Speed" mappings=[0="Auto", 1="Low", 2="Medium Low", 3="Medium", 4="Medium High", 5="High"] icon=fan
+}
+Frame label="Fan-Swing Direction"
+{
+   Switch item=AirconSwingVertical label="Direction" mappings=[0="Off", 1="Full", 2="Up", 3="Mid-up", 4="Mid", 5="Mid-low", 6="Down"] icon=flow
+}
+Frame label="Options"
+{
+   Switch item=AirconTurbo label="Turbo" icon=fan
+   Switch item=AirconLight label="Light" icon=light
+   Switch item=AirconAir label="Air" icon=flow
+   Switch item=AirconDry label="Dry" icon=rain
+   Switch item=AirconHealth label="Health" icon=smiley
+   Switch item=AirconPowerSaving label="Power Saving" icon=poweroutlet
+}
+```
+
+## Credits
+
+Most of the initial code was taken from [jllcunha/openhab-greeair-binding](https://github.com/jllcunha/openhab-greeair-binding).
 
 _Feel free to add additional sections for whatever you think should also be mentioned about your binding!_
+
+## Contribution
+
+Always welcome.
+
+## License
+
+MIT License;
+The software is provided "as is", without warranty of any kind.
