@@ -20,9 +20,14 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledFuture;
+import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -30,6 +35,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
+import org.eclipse.smarthome.core.types.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,19 +45,22 @@ import org.slf4j.LoggerFactory;
  *
  * @author Pawel Bogut - Initial contribution
  */
-// @NonNullByDefault
+@NonNullByDefault
 public class EWPESmartHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(EWPESmartHandler.class);
-    private EWPEDeviceFinder deviceFinder = null;
-    private EWPEDevice thisDevice = null;
-    private DatagramSocket clientSocket = null;
+    private @Nullable EWPEDeviceFinder deviceFinder = null;
+    private @Nullable EWPEDevice thisDevice = null;
+    private @Nullable DatagramSocket clientSocket = null;
     private Integer refreshTime = 2;
+    private boolean isRefreshing = false;
+    private @Nullable ScheduledFuture<?> refreshTask;
 
-    private String ipAddress = null;
-    private String broadcastAddress = null;
+    private String ipAddress = "";
+    private String broadcastAddress = "";
+    private long lastRefreshTime = 0;
 
-    private EWPESmartConfiguration config;
+    private @Nullable EWPESmartConfiguration config;
 
     public EWPESmartHandler(Thing thing) {
         super(thing);
@@ -63,33 +72,61 @@ public class EWPESmartHandler extends BaseThingHandler {
         try {
             if (command instanceof RefreshType) {
                 // TODO: handle data refresh
+                logger.debug("EWPESmart refresh {}", channelUID.getId());
             } else if (CHANNEL_POWER.equals(channelUID.getId())) {
                 if (command.toString() == "ON") {
                     thisDevice.SetDevicePower(clientSocket, 1);
                 } else {
                     thisDevice.SetDevicePower(clientSocket, 0);
                 }
-                // TODO: handle command
             } else if (CHANNEL_MODE.equals(channelUID.getId())) {
-                // TODO: handle command
+                int val = ((DecimalType) command).intValue();
+                thisDevice.SetDeviceMode(clientSocket, val);
             } else if (CHANNEL_TURBO.equals(channelUID.getId())) {
-                // TODO: handle command
+                if (command.toString() == "ON") {
+                    thisDevice.SetDeviceTurbo(clientSocket, 1);
+                } else {
+                    thisDevice.SetDeviceTurbo(clientSocket, 0);
+                }
             } else if (CHANNEL_LIGHT.equals(channelUID.getId())) {
-                // TODO: handle command
+                if (command.toString() == "ON") {
+                    thisDevice.SetDeviceLight(clientSocket, 1);
+                } else {
+                    thisDevice.SetDeviceLight(clientSocket, 0);
+                }
             } else if (CHANNEL_TEMP.equals(channelUID.getId())) {
-                // TODO: handle command
+                int val = ((DecimalType) command).intValue();
+                thisDevice.SetDeviceTempSet(clientSocket, val);
             } else if (CHANNEL_SWING_VERTICAL.equals(channelUID.getId())) {
-                // TODO: handle command
+                int val = ((DecimalType) command).intValue();
+                thisDevice.SetDeviceSwingVertical(clientSocket, val);
             } else if (CHANNEL_WIND_SPEED.equals(channelUID.getId())) {
-                // TODO: handle command
+                int val = ((DecimalType) command).intValue();
+                thisDevice.SetDeviceWindspeed(clientSocket, val);
             } else if (CHANNEL_AIR.equals(channelUID.getId())) {
-                // TODO: handle command
+                if (command.toString() == "ON") {
+                    thisDevice.SetDeviceAir(clientSocket, 1);
+                } else {
+                    thisDevice.SetDeviceAir(clientSocket, 0);
+                }
             } else if (CHANNEL_DRY.equals(channelUID.getId())) {
-                // TODO: handle command
+                if (command.toString() == "ON") {
+                    thisDevice.SetDeviceDry(clientSocket, 1);
+                } else {
+                    thisDevice.SetDeviceDry(clientSocket, 0);
+                }
             } else if (CHANNEL_HEALTH.equals(channelUID.getId())) {
-                // TODO: handle command
+                if (command.toString() == "ON") {
+                    thisDevice.SetDeviceHealth(clientSocket, 1);
+                } else {
+                    thisDevice.SetDeviceHealth(clientSocket, 0);
+                }
             } else if (CHANNEL_POWER_SAVE.equals(channelUID.getId())) {
-                // TODO: handle command
+                if (command.toString() == "ON") {
+                    thisDevice.SetDevicePwrSaving(clientSocket, 1);
+                } else {
+                    thisDevice.SetDevicePwrSaving(clientSocket, 0);
+                }
             }
 
             // Note: if communication with thing fails for some reason,
@@ -159,18 +196,207 @@ public class EWPESmartHandler extends BaseThingHandler {
                     updateStatus(ThingStatus.ONLINE);
 
                     // Start the automatic refresh cycles
-                    // startAutomaticRefresh();
+                    startAutomaticRefresh();
                     return;
                 }
             }
             updateStatus(ThingStatus.ONLINE);
         } catch (UnknownHostException e) {
-            logger.debug("EWPESmart failed to scan for airconditioners due to {} ", e.getMessage());
+            logger.debug("EWPESmart failed to scan for airconditioners due to {} ({})", e.getMessage(), e.getClass());
         } catch (IOException e) {
-            logger.debug("EWPESmart failed to scan for airconditioners due to {} ", e.getMessage());
+            logger.debug("EWPESmart failed to scan for airconditioners due to {} ({})", e.getMessage(), e.getClass());
         } catch (Exception e) {
-            logger.debug("EWPESmart failed to scan for airconditioners due to {} ", e.getMessage());
+            logger.debug("EWPESmart failed to scan for airconditioners due to {} ({})", e.getMessage(), e.getClass());
         }
         updateStatus(ThingStatus.OFFLINE);
+        // updateStatus(ThingStatus.ONLINE);
+    }
+
+    private void startAutomaticRefresh() {
+        Runnable refresher = new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    logger.debug("EWPESmart executing automatic update of values");
+                    // safeguard for multiple REFRESH commands
+                    if (isMinimumRefreshTimeExceeded() && !isRefreshing) {
+                        isRefreshing = true;
+                        logger.debug("Fetching status values from device.");
+                        // Get the current status from the Airconditioner
+                        thisDevice.getDeviceStatus(clientSocket);
+                    } else {
+                        logger.debug(
+                                "Skipped fetching status values from device because minimum refresh time not reached");
+                    }
+
+                    // Update All Channels
+                    List<Channel> channels = getThing().getChannels();
+                    for (Channel channel : channels) {
+                        publishChannelIfLinked(channel.getUID());
+                    }
+
+                } catch (Exception e) {
+                    logger.debug("EWPESmart failed during automatic update of airconditioner values due to {} ({}) ", e.getMessage(), e.getClass());
+                } finally {
+                    isRefreshing = false;
+                }
+
+                logger.debug("EWPESmart refresh");
+            }
+        };
+
+        refreshTask = scheduler.scheduleWithFixedDelay(refresher, 0, refreshTime.intValue(), TimeUnit.SECONDS);
+        logger.debug("Start EWPESmart automatic refresh with {} second intervals", refreshTime.intValue());
+    }
+
+    private boolean isMinimumRefreshTimeExceeded() {
+        long currentTime = System.currentTimeMillis();
+        long timeSinceLastRefresh = currentTime - lastRefreshTime;
+        if (timeSinceLastRefresh < MINIMUM_REFRESH_TIME) {
+            return false;
+        }
+        lastRefreshTime = currentTime;
+        return true;
+    }
+
+    private void publishChannelIfLinked(ChannelUID channelUID) {
+        String channelID = channelUID.getId();
+        boolean statusChanged = false;
+        // if (channelID != null && isLinked(channelID)) {
+        if (isLinked(channelID)) {
+            State state = null;
+            Integer stateValue = null;
+            if (CHANNEL_POWER.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("Pow")) {
+                    logger.trace("Pow value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("Pow");
+                    if (stateValue.intValue() != 1) {
+                        state = OnOffType.OFF;
+                    } else {
+                        state = OnOffType.ON;
+                    }
+                }
+            } else if (CHANNEL_MODE.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("Mod")) {
+                    logger.trace("Mod value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("Mod");
+                    state = new DecimalType(stateValue);
+                }
+            } else if (CHANNEL_TURBO.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("Tur")) {
+                    logger.trace("Mod value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("Tur");
+                    if (stateValue.intValue() != 1) {
+                        state = OnOffType.OFF;
+                    } else {
+                        state = OnOffType.ON;
+                    }
+                }
+            } else if (CHANNEL_LIGHT.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("Lig")) {
+                    logger.trace("Lig value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("Lig");
+                    if (stateValue.intValue() != 1) {
+                        state = OnOffType.OFF;
+                    } else {
+                        state = OnOffType.ON;
+                    }
+                }
+            } else if (CHANNEL_TEMP.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("SetTem")) {
+                    logger.trace("SetTem value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("SetTem");
+                    state = new DecimalType(stateValue);
+                }
+            } else if (CHANNEL_SWING_VERTICAL.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("SwUpDn")) {
+                    logger.trace("SwUpDn value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("SwUpDn");
+                    state = new DecimalType(stateValue);
+                }
+            } else if (CHANNEL_WIND_SPEED.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("WdSpd")) {
+                    logger.trace("WdSpd value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("WdSpd");
+                    state = new DecimalType(stateValue);
+                }
+            } else if (CHANNEL_AIR.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("Air")) {
+                    logger.trace("Air value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("Air");
+                    if (stateValue.intValue() != 1) {
+                        state = OnOffType.OFF;
+                    } else {
+                        state = OnOffType.ON;
+                    }
+                }
+            } else if (CHANNEL_DRY.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("Blo")) {
+                    logger.trace("Blo value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("Blo");
+                    if (stateValue.intValue() != 1) {
+                        state = OnOffType.OFF;
+                    } else {
+                        state = OnOffType.ON;
+                    }
+                }
+            } else if (CHANNEL_HEALTH.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("Health")) {
+                    logger.trace("Health value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("Health");
+                    if (stateValue.intValue() != 1) {
+                        state = OnOffType.OFF;
+                    } else {
+                        state = OnOffType.ON;
+                    }
+                }
+            } else if (CHANNEL_POWER_SAVE.equals(channelID)) {
+                if (thisDevice.HasStatusValChanged("SvSt")) {
+                    logger.trace("SvSt value has changed!");
+                    statusChanged = true;
+                    stateValue = thisDevice.GetIntStatusVal("SvSt");
+                    if (stateValue.intValue() != 1) {
+                        state = OnOffType.OFF;
+                    } else {
+                        state = OnOffType.ON;
+                    }
+                }
+            }
+            if (state != null && statusChanged == true) {
+                logger.debug("Updating channel state for ChannelID {} : {}", channelID, state);
+                updateState(channelID, state);
+            }
+        }
+    }
+
+    /**
+     * Shutdown thing, make sure background jobs are canceled
+     */
+    @SuppressWarnings("null")
+    @Override
+    public void dispose() {
+        logger.debug("EWPESmart Shutdown thing {}", thing.getUID());
+        try {
+            if (refreshTask != null) {
+                refreshTask.cancel(true);
+                refreshTask = null;
+            }
+            logger.debug("EWPESmart refreshTask stopped for thing {}", thing.getUID());
+        } catch (Exception e) {
+            logger.debug("EWPESmart Exception on dispose(): {} ({})", e.getMessage(), e.getClass());
+        } finally {
+            super.dispose();
+        }
     }
 }

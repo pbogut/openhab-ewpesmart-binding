@@ -49,4 +49,5 @@ public class EWPESmartBindingConstants {
 
     // Other constants
     public static final int DATAGRAM_SOCKET_TIMEOUT = 5000;
+    public static final int MINIMUM_REFRESH_TIME = 1000;
 }
