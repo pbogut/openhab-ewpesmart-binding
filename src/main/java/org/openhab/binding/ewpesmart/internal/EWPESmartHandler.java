@@ -216,6 +216,9 @@ public class EWPESmartHandler extends BaseThingHandler {
         Runnable refresher = new Runnable() {
             @Override
             public void run() {
+                if (thisDevice == null || !thisDevice.getIsBound()) {
+                    return;
+                }
 
                 try {
                     logger.debug("EWPESmart executing automatic update of values");
@@ -264,7 +267,7 @@ public class EWPESmartHandler extends BaseThingHandler {
         String channelID = channelUID.getId();
         boolean statusChanged = false;
         // if (channelID != null && isLinked(channelID)) {
-        if (isLinked(channelID)) {
+        if (thisDevice != null && thisDevice.getIsBound() && isLinked(channelID)) {
             State state = null;
             Integer stateValue = null;
             if (CHANNEL_POWER.equals(channelID)) {
@@ -393,6 +396,7 @@ public class EWPESmartHandler extends BaseThingHandler {
     @SuppressWarnings("null")
     @Override
     public void dispose() {
+        updateStatus(ThingStatus.OFFLINE);
         logger.debug("EWPESmart Shutdown thing {}", thing.getUID());
         try {
             if (refreshTask != null) {
