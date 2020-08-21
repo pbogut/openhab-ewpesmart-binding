@@ -107,11 +107,9 @@ public class EWPESmartHandler extends BaseThingHandler {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
             "Invalid EWPE Smart config. Check configuration.");
         } else {
-            // @fixme @todo not working within lambda, not sure why
-            // scheduler.execute(() -> {
-            //     bindDevice();
-            // });
-            bindDevice();
+            scheduler.execute(() -> {
+                bindDevice();
+            });
         }
 
         logger.debug("Finished initializing!");
