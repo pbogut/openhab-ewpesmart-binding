@@ -60,8 +60,8 @@ public class EWPEDevice {
     private EWPEScanResponse4Gson mScanResponseGson = null;
     private EWPEBindResponse4Gson bindResponseGson = null;
     private EWPEStatusResponse4Gson statusResponseGson = null;
-    private EWPEStatusResponsePack4Gson prevStatusResponsePackGson = null;
     private final Logger logger = LoggerFactory.getLogger(EWPEDevice.class);
+    private HashMap<String, Integer> parametersState = new HashMap<>();
 
     public Boolean getIsBound() {
         return mIsBound;
@@ -508,9 +508,6 @@ public class EWPEDevice {
     }
 
     public Boolean HasStatusValChanged(String valueName) {
-        if (prevStatusResponsePackGson == null) {
-            return Boolean.TRUE;
-        }
         // Find the valueName in the Current Status object
         String currcolumns[] = statusResponseGson.packJson.cols;
         Integer currvalues[] = statusResponseGson.packJson.dat;
@@ -523,25 +520,26 @@ public class EWPEDevice {
         // Now get the Corresponding value
         Integer currvalue = currvalList.get(currvalueArrayposition);
 
-        // Find the valueName in the Previous Status object
-        String prevcolumns[] = prevStatusResponsePackGson.cols;
-        Integer prevvalues[] = prevStatusResponsePackGson.dat;
-        List<String> prevcolList = new ArrayList<>(Arrays.asList(prevcolumns));
-        List<Integer> prevvalList = new ArrayList<>(Arrays.asList(prevvalues));
-        int prevvalueArrayposition = prevcolList.indexOf(valueName);
-        if (prevvalueArrayposition == -1) {
-            return null;
+        if (parametersState.get(valueName) == null) {
+            //now previous value so assign the current one
+            parametersState.put(valueName, currvalue);
+            return Boolean.TRUE;
         }
-        // Now get the Corresponding value
-        Integer prevvalue = prevvalList.get(prevvalueArrayposition);
 
-        // Finally Compare the values
-        return new Boolean(currvalue.intValue() != prevvalue.intValue());
+        // Finally Compare the stored state
+        return new Boolean(currvalue.intValue() != parametersState.get(valueName));
     }
 
     protected void ExecuteCommand(DatagramSocket clientSocket, HashMap<String, Integer> parameters) throws Exception {
         byte[] sendData = new byte[1024];
         byte[] receiveData = new byte[1024];
+
+        // update state now to reflect the UI status,
+        // if command fails it will get changed with next refresh
+        for(HashMap.Entry<String, Integer> e: parameters.entrySet()){
+            parametersState.put(e.getKey(), e.getValue());
+        }
+
         Gson gson = new Gson();
 
         logger.warn("Execute command");
@@ -666,13 +664,6 @@ public class EWPEDevice {
 
         statusResponseGson.packJson = gson.fromJson(new JsonReader(stringReader), EWPEStatusResponsePack4Gson.class);
         UpdateTempFtoC();
-
-        // Keep a copy of the old response to be used to check if values have changed
-        // If first time running, there will not be a previous EWPEStatusResponsePack4Gson
-        if (statusResponseGson != null && statusResponseGson.packJson != null) {
-            logger.trace("EWPESmart: Set previous status response");
-            prevStatusResponsePackGson = new EWPEStatusResponsePack4Gson(statusResponseGson.packJson);
-        }
     }
 
     private void UpdateTempFtoC(){
