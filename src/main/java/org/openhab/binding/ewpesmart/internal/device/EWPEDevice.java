@@ -490,6 +490,9 @@ public class EWPEDevice {
          * "SvSt": Power Saving
          */
         // Find the valueName in the Returned Status object
+        if (statusResponseGson == null) {
+          return null;
+        }
         String columns[] = statusResponseGson.packJson.cols;
         Integer values[] = statusResponseGson.packJson.dat;
         List<String> colList = new ArrayList<>(Arrays.asList(columns));
