@@ -79,14 +79,14 @@ public class EWPESmartHandler extends BaseThingHandler {
             } catch (SocketTimeoutException e) {
                 logger.debug("EWPESmart: failed to send command to airconditioners due to Timeout, try no. {}", tryNo);
                 if (tryNo >= SEND_MESSAGE_TRIES) {
-                    logger.warn("EWPESmart failed to update channel {} due to connection timeout after {} tries", channelUID.getId(), e.getMessage(), tryNo);
+                    logger.warn("EWPESmart: failed to update channel {} due to connection timeout after {} tries", channelUID.getId(), tryNo);
                     updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                             "Could not control device due to multiple connection timeouts.");
                     break; // just give up
                 }
                 tryNo++;
             } catch (Exception e) {
-                logger.warn("EWPESmart failed to update channel {} due to {} ", channelUID.getId(), e.getMessage());
+                logger.warn("EWPESmart: failed to update channel {} due to {} ", channelUID.getId(), e.getMessage());
                 updateStatus(ThingStatus.OFFLINE);
                 // e.printStackTrace();
                 break;
@@ -116,7 +116,7 @@ public class EWPESmartHandler extends BaseThingHandler {
                     } catch (SocketTimeoutException e) {
                         logger.debug("EWPESmart: failed to scan for airconditioners due to Timeout, try no. {}", tryNo);
                         if (tryNo >= BIND_DEVICE_TRIES) {
-                            logger.warn("EWPESmart failed to bind device thing.getUID() due to connection timeout after {} tries", e.getMessage(), tryNo);
+                            logger.warn("EWPESmart: failed to bind device {} due to connection timeout after {} tries", thing.getUID(), tryNo);
                             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                                     "Could not bind device due to multiple connection timeouts.");
                             break; // just give up

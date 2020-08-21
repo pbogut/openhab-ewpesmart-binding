@@ -163,7 +163,7 @@ public class EWPEDevice {
         // Now set the key and flag to indicate the bind was succesful
         mKey = bindResponseGson.packJson.key;
 
-        logger.warn("Key received: {}",mKey);
+        logger.debug("Key received: {}", mKey);
 
         setIsBound(Boolean.TRUE);
     }
@@ -542,7 +542,7 @@ public class EWPEDevice {
 
         Gson gson = new Gson();
 
-        logger.warn("Execute command");
+        logger.trace("Execute command");
 
         // Convert the parameter map values to arrays
         String[] keyArray = parameters.keySet().toArray(new String[0]);
