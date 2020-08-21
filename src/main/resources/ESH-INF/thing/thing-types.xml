@@ -65,22 +65,22 @@
 		<description>Current Light Setting</description>
 	</channel-type>
 	<channel-type id="tempType">
-		<item-type>Switch</item-type>
+		<item-type>Number</item-type>
 		<label>Temperature</label>
 		<description>Current Temperature Setting</description>
 	</channel-type>
 	<channel-type id="tempSensorType">
-		<item-type>Switch</item-type>
+		<item-type>Number</item-type>
 		<label>Room Temperature</label>
 		<description>Current Room Temperature</description>
 	</channel-type>
 	<channel-type id="swingVerticalType">
-		<item-type>Switch</item-type>
+		<item-type>Number</item-type>
 		<label>Swing Vertical Direction</label>
 		<description>Current Swing Vertical Direction Setting (0:Off, 1:Full, 2:Up, 3:Mid-up, 4:Mid, 5:Mid-low, 6:Down)</description>
 	</channel-type>
 	<channel-type id="windSpeedType">
-		<item-type>Switch</item-type>
+		<item-type>Number</item-type>
 		<label>Wind Speed</label>
 		<description>Current Wind Speed Setting (0:Auto, 1:Low, 2:MidLow, 3:Mid, 4:MidHigh, 5:High)</description>
 	</channel-type>
