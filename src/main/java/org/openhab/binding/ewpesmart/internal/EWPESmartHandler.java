@@ -108,15 +108,29 @@ public class EWPESmartHandler extends BaseThingHandler {
             "Invalid EWPE Smart config. Check configuration.");
         } else {
             scheduler.execute(() -> {
-                bindDevice();
+                int tryNo = 1;
+                while(true) {
+                    try {
+                        bindDevice();
+                        break;
+                    } catch (SocketTimeoutException e) {
+                        logger.debug("EWPESmart: failed to scan for airconditioners due to Timeout, try no. {}", tryNo);
+                        if (tryNo >= BIND_DEVICE_TRIES) {
+                            logger.warn("EWPESmart failed to bind device thing.getUID() due to connection timeout after {} tries", e.getMessage(), tryNo);
+                            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                                    "Could not bind device due to multiple connection timeouts.");
+                            break; // just give up
+                        }
+                        tryNo++;
+                    }
+                }
             });
         }
 
         logger.debug("Finished initializing!");
     }
 
-
-    private void bindDevice() {
+    private void bindDevice() throws SocketTimeoutException {
         ipAddress = config.getIpAddress();
         refreshTime = config.getRefresh();
         broadcastAddress = config.getBroadcastIp();
@@ -152,6 +166,9 @@ public class EWPESmartHandler extends BaseThingHandler {
                 }
             }
             updateStatus(ThingStatus.ONLINE);
+        } catch (SocketTimeoutException e) {
+            // bubble up so we can retry
+            throw e;
         } catch (UnknownHostException e) {
             logger.debug("EWPESmart failed to scan for airconditioners due to {} ({})", e.getMessage(), e.getClass());
         } catch (IOException e) {
