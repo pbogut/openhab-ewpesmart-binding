@@ -647,26 +647,24 @@ public class EWPEDevice {
         DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, getAddress(), getPort());
         clientSocket.send(sendPacket);
 
-        logger.trace("Sending Status request packet to device");
+        logger.trace("EWPESmart: Sending Status request packet to device");
 
         // Recieve a response
         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
         clientSocket.receive(receivePacket);
-        logger.trace("Status request packet received from device");
         String modifiedSentence = new String(receivePacket.getData());
-
         // Keep a copy of the old response to be used to check if values have changed
         // If first time running, there will not be a previous EWPEStatusResponsePack4Gson
         if (statusResponseGson != null && statusResponseGson.packJson != null) {
             prevStatusResponsePackGson = new EWPEStatusResponsePack4Gson(statusResponseGson.packJson);
         }
+        logger.trace("EWPESmart: Received packet data {}", modifiedSentence);
 
         // Read the response
         StringReader stringReader = new StringReader(modifiedSentence);
         statusResponseGson = gson.fromJson(new JsonReader(stringReader), EWPEStatusResponse4Gson.class);
         statusResponseGson.decryptedPack = Crypto.decryptPack(this.getKey().getBytes(), statusResponseGson.pack);
-
-        logger.trace("Response from device: {}", statusResponseGson.decryptedPack);
+        logger.trace("EWPESmart: Response from device: {}", statusResponseGson.decryptedPack);
 
         // Create the JSON to hold the response values
         stringReader = new StringReader(statusResponseGson.decryptedPack);
