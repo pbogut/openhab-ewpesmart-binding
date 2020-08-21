@@ -653,11 +653,6 @@ public class EWPEDevice {
         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
         clientSocket.receive(receivePacket);
         String modifiedSentence = new String(receivePacket.getData());
-        // Keep a copy of the old response to be used to check if values have changed
-        // If first time running, there will not be a previous EWPEStatusResponsePack4Gson
-        if (statusResponseGson != null && statusResponseGson.packJson != null) {
-            prevStatusResponsePackGson = new EWPEStatusResponsePack4Gson(statusResponseGson.packJson);
-        }
         logger.trace("EWPESmart: Received packet data {}", modifiedSentence);
 
         // Read the response
@@ -671,6 +666,13 @@ public class EWPEDevice {
 
         statusResponseGson.packJson = gson.fromJson(new JsonReader(stringReader), EWPEStatusResponsePack4Gson.class);
         UpdateTempFtoC();
+
+        // Keep a copy of the old response to be used to check if values have changed
+        // If first time running, there will not be a previous EWPEStatusResponsePack4Gson
+        if (statusResponseGson != null && statusResponseGson.packJson != null) {
+            logger.trace("EWPESmart: Set previous status response");
+            prevStatusResponsePackGson = new EWPEStatusResponsePack4Gson(statusResponseGson.packJson);
+        }
     }
 
     private void UpdateTempFtoC(){
