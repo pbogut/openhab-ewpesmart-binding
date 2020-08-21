@@ -87,7 +87,7 @@ public class EWPESmartHandler extends BaseThingHandler {
                 tryNo++;
             } catch (Exception e) {
                 logger.warn("EWPESmart failed to update channel {} due to {} ", channelUID.getId(), e.getMessage());
-                // updateStatus(ThingStatus.OFFLINE);
+                updateStatus(ThingStatus.OFFLINE);
                 // e.printStackTrace();
                 break;
             }
@@ -165,7 +165,6 @@ public class EWPESmartHandler extends BaseThingHandler {
                     return;
                 }
             }
-            updateStatus(ThingStatus.ONLINE);
         } catch (SocketTimeoutException e) {
             // bubble up so we can retry
             throw e;
@@ -177,7 +176,6 @@ public class EWPESmartHandler extends BaseThingHandler {
             logger.debug("EWPESmart failed to scan for airconditioners due to {} ({})", e.getMessage(), e.getClass());
         }
         updateStatus(ThingStatus.OFFLINE);
-        // updateStatus(ThingStatus.ONLINE);
     }
 
     private void startAutomaticRefresh() {
@@ -206,9 +204,12 @@ public class EWPESmartHandler extends BaseThingHandler {
                     for (Channel channel : channels) {
                         publishChannelIfLinked(channel.getUID());
                     }
-
+                } catch (SocketTimeoutException e) {
+                    //we dont care too much, will try again
+                    logger.debug("EWPESmart: failed during automatic update of airconditioner values due to Timeout");
                 } catch (Exception e) {
-                    logger.debug("EWPESmart failed during automatic update of airconditioner values due to {} ({}) ", e.getMessage(), e.getClass());
+                    logger.warn("EWPESmart: failed during automatic update of airconditioner values due to {} ({}) ", e.getMessage(), e.getClass());
+                    // e.printStackTrace();
                 } finally {
                     isRefreshing = false;
                 }
