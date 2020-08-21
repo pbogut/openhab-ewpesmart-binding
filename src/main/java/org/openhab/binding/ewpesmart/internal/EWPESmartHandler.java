@@ -19,6 +19,7 @@ import org.openhab.binding.ewpesmart.internal.device.EWPEDeviceFinder;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.ScheduledFuture;
@@ -69,75 +70,27 @@ public class EWPESmartHandler extends BaseThingHandler {
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         logger.debug("Channel update: {}", channelUID.getId());
-        try {
-            if (command instanceof RefreshType) {
-                // TODO: handle data refresh
-                logger.debug("EWPESmart refresh {}", channelUID.getId());
-            } else if (CHANNEL_POWER.equals(channelUID.getId())) {
-                if (command.toString() == "ON") {
-                    thisDevice.SetDevicePower(clientSocket, 1);
-                } else {
-                    thisDevice.SetDevicePower(clientSocket, 0);
+        // due to timeouts that happens often lets try to update few times
+        int tryNo = 1;
+        while(true) {
+            try {
+                doHandleCommand(channelUID, command);
+                break;
+            } catch (SocketTimeoutException e) {
+                logger.debug("EWPESmart: failed to send command to airconditioners due to Timeout, try no. {}", tryNo);
+                if (tryNo >= SEND_MESSAGE_TRIES) {
+                    logger.warn("EWPESmart failed to update channel {} due to connection timeout after {} tries", channelUID.getId(), e.getMessage(), tryNo);
+                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                            "Could not control device due to multiple connection timeouts.");
+                    break; // just give up
                 }
-            } else if (CHANNEL_MODE.equals(channelUID.getId())) {
-                int val = ((DecimalType) command).intValue();
-                thisDevice.SetDeviceMode(clientSocket, val);
-            } else if (CHANNEL_TURBO.equals(channelUID.getId())) {
-                if (command.toString() == "ON") {
-                    thisDevice.SetDeviceTurbo(clientSocket, 1);
-                } else {
-                    thisDevice.SetDeviceTurbo(clientSocket, 0);
-                }
-            } else if (CHANNEL_LIGHT.equals(channelUID.getId())) {
-                if (command.toString() == "ON") {
-                    thisDevice.SetDeviceLight(clientSocket, 1);
-                } else {
-                    thisDevice.SetDeviceLight(clientSocket, 0);
-                }
-            } else if (CHANNEL_TEMP.equals(channelUID.getId())) {
-                int val = ((DecimalType) command).intValue();
-                thisDevice.SetDeviceTempSet(clientSocket, val);
-            } else if (CHANNEL_SWING_VERTICAL.equals(channelUID.getId())) {
-                int val = ((DecimalType) command).intValue();
-                thisDevice.SetDeviceSwingVertical(clientSocket, val);
-            } else if (CHANNEL_WIND_SPEED.equals(channelUID.getId())) {
-                int val = ((DecimalType) command).intValue();
-                thisDevice.SetDeviceWindspeed(clientSocket, val);
-            } else if (CHANNEL_AIR.equals(channelUID.getId())) {
-                if (command.toString() == "ON") {
-                    thisDevice.SetDeviceAir(clientSocket, 1);
-                } else {
-                    thisDevice.SetDeviceAir(clientSocket, 0);
-                }
-            } else if (CHANNEL_DRY.equals(channelUID.getId())) {
-                if (command.toString() == "ON") {
-                    thisDevice.SetDeviceDry(clientSocket, 1);
-                } else {
-                    thisDevice.SetDeviceDry(clientSocket, 0);
-                }
-            } else if (CHANNEL_HEALTH.equals(channelUID.getId())) {
-                if (command.toString() == "ON") {
-                    thisDevice.SetDeviceHealth(clientSocket, 1);
-                } else {
-                    thisDevice.SetDeviceHealth(clientSocket, 0);
-                }
-            } else if (CHANNEL_POWER_SAVE.equals(channelUID.getId())) {
-                if (command.toString() == "ON") {
-                    thisDevice.SetDevicePwrSaving(clientSocket, 1);
-                } else {
-                    thisDevice.SetDevicePwrSaving(clientSocket, 0);
-                }
+                tryNo++;
+            } catch (Exception e) {
+                logger.warn("EWPESmart failed to update channel {} due to {} ", channelUID.getId(), e.getMessage());
+                // updateStatus(ThingStatus.OFFLINE);
+                // e.printStackTrace();
+                break;
             }
-
-            // Note: if communication with thing fails for some reason,
-            // indicate that by setting the status with detail information:
-            // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-            // "Could not control device at IP address x.x.x.x");
-            // updateStatus(ThingStatus.ONLINE);
-        } catch (Exception e) {
-            logger.warn("EWPESmart failed to update channel {} due to {} ", channelUID.getId(), e.getMessage());
-            // updateStatus(ThingStatus.OFFLINE);
-            // e.printStackTrace();
         }
     }
 
@@ -261,6 +214,67 @@ public class EWPESmartHandler extends BaseThingHandler {
         }
         lastRefreshTime = currentTime;
         return true;
+    }
+
+    private void doHandleCommand(ChannelUID channelUID, Command command) throws Exception {
+        if (command instanceof RefreshType) {
+            // TODO: handle data refresh
+            logger.debug("EWPESmart refresh {}", channelUID.getId());
+        } else if (CHANNEL_POWER.equals(channelUID.getId())) {
+            if (command.toString() == "ON") {
+                thisDevice.SetDevicePower(clientSocket, 1);
+            } else {
+                thisDevice.SetDevicePower(clientSocket, 0);
+            }
+        } else if (CHANNEL_MODE.equals(channelUID.getId())) {
+            int val = ((DecimalType) command).intValue();
+            thisDevice.SetDeviceMode(clientSocket, val);
+        } else if (CHANNEL_TURBO.equals(channelUID.getId())) {
+            if (command.toString() == "ON") {
+                thisDevice.SetDeviceTurbo(clientSocket, 1);
+            } else {
+                thisDevice.SetDeviceTurbo(clientSocket, 0);
+            }
+        } else if (CHANNEL_LIGHT.equals(channelUID.getId())) {
+            if (command.toString() == "ON") {
+                thisDevice.SetDeviceLight(clientSocket, 1);
+            } else {
+                thisDevice.SetDeviceLight(clientSocket, 0);
+            }
+        } else if (CHANNEL_TEMP.equals(channelUID.getId())) {
+            int val = ((DecimalType) command).intValue();
+            thisDevice.SetDeviceTempSet(clientSocket, val);
+        } else if (CHANNEL_SWING_VERTICAL.equals(channelUID.getId())) {
+            int val = ((DecimalType) command).intValue();
+            thisDevice.SetDeviceSwingVertical(clientSocket, val);
+        } else if (CHANNEL_WIND_SPEED.equals(channelUID.getId())) {
+            int val = ((DecimalType) command).intValue();
+            thisDevice.SetDeviceWindspeed(clientSocket, val);
+        } else if (CHANNEL_AIR.equals(channelUID.getId())) {
+            if (command.toString() == "ON") {
+                thisDevice.SetDeviceAir(clientSocket, 1);
+            } else {
+                thisDevice.SetDeviceAir(clientSocket, 0);
+            }
+        } else if (CHANNEL_DRY.equals(channelUID.getId())) {
+            if (command.toString() == "ON") {
+                thisDevice.SetDeviceDry(clientSocket, 1);
+            } else {
+                thisDevice.SetDeviceDry(clientSocket, 0);
+            }
+        } else if (CHANNEL_HEALTH.equals(channelUID.getId())) {
+            if (command.toString() == "ON") {
+                thisDevice.SetDeviceHealth(clientSocket, 1);
+            } else {
+                thisDevice.SetDeviceHealth(clientSocket, 0);
+            }
+        } else if (CHANNEL_POWER_SAVE.equals(channelUID.getId())) {
+            if (command.toString() == "ON") {
+                thisDevice.SetDevicePwrSaving(clientSocket, 1);
+            } else {
+                thisDevice.SetDevicePwrSaving(clientSocket, 0);
+            }
+        }
     }
 
     private void publishChannelIfLinked(ChannelUID channelUID) {
