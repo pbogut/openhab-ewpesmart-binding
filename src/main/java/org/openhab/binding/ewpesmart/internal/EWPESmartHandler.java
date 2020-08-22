@@ -301,122 +301,78 @@ public class EWPESmartHandler extends BaseThingHandler {
             State state = null;
             Integer stateValue = null;
             if (CHANNEL_POWER.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("Pow")) {
-                    logger.trace("Pow value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("Pow");
-                    if (stateValue.intValue() != 1) {
-                        state = OnOffType.OFF;
-                    } else {
-                        state = OnOffType.ON;
-                    }
+                stateValue = thisDevice.GetIntStatusValIfChanged("Pow");
+                if (stateValue != null) {
+                    state = GetOnOffFromInt(stateValue);
                 }
             } else if (CHANNEL_MODE.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("Mod")) {
-                    logger.trace("Mod value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("Mod");
+                stateValue = thisDevice.GetIntStatusValIfChanged("Mod");
+                if (stateValue != null) {
                     state = new DecimalType(stateValue);
                 }
             } else if (CHANNEL_TURBO.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("Tur")) {
-                    logger.trace("Mod value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("Tur");
-                    if (stateValue.intValue() != 1) {
-                        state = OnOffType.OFF;
-                    } else {
-                        state = OnOffType.ON;
-                    }
+                stateValue = thisDevice.GetIntStatusValIfChanged("Tur");
+                if (stateValue != null) {
+                    state = GetOnOffFromInt(stateValue);
                 }
             } else if (CHANNEL_LIGHT.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("Lig")) {
-                    logger.trace("Lig value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("Lig");
-                    if (stateValue.intValue() != 1) {
-                        state = OnOffType.OFF;
-                    } else {
-                        state = OnOffType.ON;
-                    }
+                stateValue = thisDevice.GetIntStatusValIfChanged("Lig");
+                if (stateValue != null) {
+                    state = GetOnOffFromInt(stateValue);
                 }
             } else if (CHANNEL_TEMP.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("SetTem")) {
-                    logger.trace("SetTem value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("SetTem");
+                stateValue = thisDevice.GetIntStatusValIfChanged("SetTem");
+                if (stateValue != null) {
                     state = new DecimalType(stateValue);
                 }
             } else if (CHANNEL_TEMP_SENSOR.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("TemSen")) {
-                    logger.trace("TemSen value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("TemSen");
+                stateValue = thisDevice.GetIntStatusValIfChanged("TemSen");
+                if (stateValue != null) {
                     state = new DecimalType(stateValue);
                 }
             } else if (CHANNEL_SWING_VERTICAL.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("SwUpDn")) {
-                    logger.trace("SwUpDn value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("SwUpDn");
+                stateValue = thisDevice.GetIntStatusValIfChanged("SwUpDn");
+                if (stateValue != null) {
                     state = new DecimalType(stateValue);
                 }
             } else if (CHANNEL_WIND_SPEED.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("WdSpd")) {
-                    logger.trace("WdSpd value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("WdSpd");
+                stateValue = thisDevice.GetIntStatusValIfChanged("WdSpd");
+                if (stateValue != null) {
                     state = new DecimalType(stateValue);
                 }
             } else if (CHANNEL_AIR.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("Air")) {
-                    logger.trace("Air value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("Air");
-                    if (stateValue.intValue() != 1) {
-                        state = OnOffType.OFF;
-                    } else {
-                        state = OnOffType.ON;
-                    }
+                stateValue = thisDevice.GetIntStatusValIfChanged("Air");
+                if (stateValue != null) {
+                    state = GetOnOffFromInt(stateValue);
                 }
             } else if (CHANNEL_DRY.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("Blo")) {
-                    logger.trace("Blo value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("Blo");
-                    if (stateValue.intValue() != 1) {
-                        state = OnOffType.OFF;
-                    } else {
-                        state = OnOffType.ON;
-                    }
+                stateValue = thisDevice.GetIntStatusValIfChanged("Blo");
+                if (stateValue != null) {
+                    state = GetOnOffFromInt(stateValue);
                 }
             } else if (CHANNEL_HEALTH.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("Health")) {
-                    logger.trace("Health value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("Health");
-                    if (stateValue.intValue() != 1) {
-                        state = OnOffType.OFF;
-                    } else {
-                        state = OnOffType.ON;
-                    }
+                stateValue = thisDevice.GetIntStatusValIfChanged("Health");
+                if (stateValue != null) {
+                    state = GetOnOffFromInt(stateValue);
                 }
             } else if (CHANNEL_POWER_SAVE.equals(channelID)) {
-                if (thisDevice.HasStatusValChanged("SvSt")) {
-                    logger.trace("SvSt value has changed!");
-                    statusChanged = true;
-                    stateValue = thisDevice.GetIntStatusVal("SvSt");
-                    if (stateValue.intValue() != 1) {
-                        state = OnOffType.OFF;
-                    } else {
-                        state = OnOffType.ON;
-                    }
+                stateValue = thisDevice.GetIntStatusValIfChanged("SvSt");
+                if (stateValue != null) {
+                    state = GetOnOffFromInt(stateValue);
                 }
             }
-            if (state != null && statusChanged == true) {
+            if (state != null) {
                 logger.debug("Updating channel state for ChannelID {} : {}", channelID, state);
                 updateState(channelID, state);
             }
+        }
+    }
+
+    private OnOffType GetOnOffFromInt(Integer stateValue) {
+        if (stateValue.intValue() == 1) {
+            return OnOffType.ON;
+        } else {
+            return OnOffType.OFF;
         }
     }
 

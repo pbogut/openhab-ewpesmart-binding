@@ -507,27 +507,26 @@ public class EWPEDevice {
         return value;
     }
 
-    public Boolean HasStatusValChanged(String valueName) {
+    /**
+     * Returns Itteger value for state if it changed since the last time this
+     * command was run for given state.
+     */
+    public Integer GetIntStatusValIfChanged(String valueName) {
         // Find the valueName in the Current Status object
-        String currcolumns[] = statusResponseGson.packJson.cols;
-        Integer currvalues[] = statusResponseGson.packJson.dat;
-        List<String> currcolList = new ArrayList<>(Arrays.asList(currcolumns));
-        List<Integer> currvalList = new ArrayList<>(Arrays.asList(currvalues));
-        int currvalueArrayposition = currcolList.indexOf(valueName);
-        if (currvalueArrayposition == -1) {
+        Integer currvalue = GetIntStatusVal(valueName);
+        Integer prevvalue = parametersState.get(valueName);
+
+        //assign curr value to state
+        parametersState.put(valueName, currvalue);
+        if (currvalue == null) {
             return null;
         }
-        // Now get the Corresponding value
-        Integer currvalue = currvalList.get(currvalueArrayposition);
-
-        if (parametersState.get(valueName) == null) {
-            //now previous value so assign the current one
-            parametersState.put(valueName, currvalue);
-            return Boolean.TRUE;
+        if (prevvalue == null || currvalue.intValue() != prevvalue.intValue()) {
+            logger.trace("EWPESmart: {} value has changed!", valueName);
+            return currvalue;
+        } else {
+            return null;
         }
-
-        // Finally Compare the stored state
-        return new Boolean(currvalue.intValue() != parametersState.get(valueName));
     }
 
     protected void ExecuteCommand(DatagramSocket clientSocket, HashMap<String, Integer> parameters) throws Exception {
