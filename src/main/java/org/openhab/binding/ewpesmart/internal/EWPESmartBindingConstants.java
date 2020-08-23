@@ -12,6 +12,9 @@
  */
 package org.openhab.binding.ewpesmart.internal;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
@@ -28,6 +31,7 @@ public class EWPESmartBindingConstants {
 
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_AIRCON = new ThingTypeUID(BINDING_ID, "EWPEAirCon");
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Collections.singleton(THING_TYPE_AIRCON);
 
     // List of all Config options
     public static final String CONFIG_BROADCAST_IP = "broadcastIp";

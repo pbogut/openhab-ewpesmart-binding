@@ -55,6 +55,7 @@ public class EWPEDevice {
     private final static HashMap<String, HashMap<String,Integer>> tempRanges = createTempRangeMap();
     private Boolean mIsBound = false;
     private InetAddress mAddress;
+    private InetAddress mBroadcast;
     private int mPort = 0;
     private String mKey;
     private EWPEScanResponse4Gson mScanResponseGson = null;
@@ -77,6 +78,14 @@ public class EWPEDevice {
 
     public void setAddress(InetAddress address) {
         this.mAddress = address;
+    }
+
+    public InetAddress getBroadcast() {
+        return mBroadcast;
+    }
+
+    public void setBroadcast(InetAddress address) {
+        this.mBroadcast = address;
     }
 
     public int getPort() {

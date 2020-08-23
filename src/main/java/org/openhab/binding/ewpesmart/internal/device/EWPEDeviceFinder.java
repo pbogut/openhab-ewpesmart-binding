@@ -118,6 +118,7 @@ public class EWPEDeviceFinder {
                     EWPEDevice newDevice = new EWPEDevice();
                     newDevice.setAddress(remoteAddress);
                     newDevice.setPort(remotePort);
+                    newDevice.setBroadcast(mIPAddress);
                     newDevice.setScanResponseGson(scanResponseGson);
 
                     AddDevice(newDevice);
