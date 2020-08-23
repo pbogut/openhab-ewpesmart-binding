@@ -12,7 +12,11 @@ This binding supports one Thing type: EWPEAirCon.
 
 ## Discovery
 
-Discovery is possible but as yet is not supported in this binding.
+Experimental discovery is implemented, to trigger it manually follow these steps:
+
+- Go to Inbox
+- Click Scan button in the top right corner
+- Click Refresh button next to EWPESmart Binding
 
 ## Thing Configuration
 
