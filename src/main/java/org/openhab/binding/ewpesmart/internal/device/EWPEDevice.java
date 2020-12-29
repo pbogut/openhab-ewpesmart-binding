@@ -51,6 +51,7 @@ import com.google.gson.stream.JsonReader;
  */
 
 public class EWPEDevice {
+    private final static Integer ROOM_TEMP_OFFSET = 40;
     private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
     private final static HashMap<String, HashMap<String,Integer>> tempRanges = createTempRangeMap();
     private Boolean mIsBound = false;
@@ -398,7 +399,17 @@ public class EWPEDevice {
     }
 
     public Integer GetDeviceTempSen() {
-        return GetIntStatusVal("TemSen");
+        // TemSen has 40 offset to avoid having negative values
+        Integer curVal = GetIntStatusVal("TemSen") - ROOM_TEMP_OFFSET;
+        Integer outVal = curVal;
+        Integer CorF = GetIntStatusVal("TemUn");
+        if (CorF == 1) { // If Fahrenheit,
+            // value argument is degrees F, convert Celsius to Fahrenheit,
+            // TemSen output from A/C is always in Celsius despite passing in 1
+            // to TemUn
+            outVal = Integer.valueOf((int)Math.round((curVal * 1.8) + 32.)); // Integer Truncated
+        }
+        return outVal;
     }
 
     public void SetDeviceAir(DatagramSocket clientSocket, Integer value) throws Exception {
@@ -493,7 +504,7 @@ public class EWPEDevice {
          * "Tur": Turbo
          * "StHt": 0,
          * "TemUn": Temperature unit, 0 for Celsius, 1 for Fahrenheit
-         * "TemSen": Room Temperature
+         * "TemSen": Room Temperature with (+40 offset to avoid negative values)
          * "HeatCoolType"
          * "TemRec": (0 or 1), Send with SetTem, when TemUn==1, distinguishes between upper and lower integer Fahrenheit temp
          * "SvSt": Power Saving

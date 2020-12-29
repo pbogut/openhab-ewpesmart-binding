@@ -328,7 +328,7 @@ public class EWPESmartHandler extends BaseThingHandler {
             } else if (CHANNEL_TEMP_SENSOR.equals(channelID)) {
                 stateValue = thisDevice.GetIntStatusValIfChanged("TemSen");
                 if (stateValue != null) {
-                    state = new DecimalType(stateValue);
+                    state = new DecimalType(thisDevice.GetDeviceTempSen());
                 }
             } else if (CHANNEL_SWING_VERTICAL.equals(channelID)) {
                 stateValue = thisDevice.GetIntStatusValIfChanged("SwUpDn");
